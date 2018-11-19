@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--OnlineSubsystemFacebook plugin additions-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- init section is always evaluated once per architecture -->
+  <init>
+    <log text="QQ SDK Android init"/>
+  </init>
+
+  <!-- optional files or directories to copy to Intermediate/Android/APK -->
+  <resourceCopies>
+    <copyFile src="$S(PluginDir)/../../lib/Android/open_sdk_r6019_lite.jar" dst="$S(BuildDir)/libs/open_sdk_r6019_lite.jar" />
+  </resourceCopies>
+
+  <!-- Files to copy before the build so they can be used in the build -->
+  <prebuildCopies>
+  </prebuildCopies>
+
+  <!-- AAR dependencies -->
+  <AARImports>
+  </AARImports>
+
+  <buildGradleAdditions>
+  </buildGradleAdditions>
+
+  <!-- optional updates applied to AndroidManifest.xml -->
+  <androidManifestUpdates>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <addElements tag="application">
+      <activity
+        android:name="com.tencent.tauth.AuthActivity"
+        android:noHistory="true"
+        android:launchMode="singleTask" >
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+          <data android:scheme="tencent111111111" />
+        </intent-filter>
+      </activity>
+     <activity android:name="com.tencent.connect.common.AssistActivity"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar"
+      android:configChanges="orientation|keyboardHidden|screenSize"
+      />
+    </addElements>
+        
+  </androidManifestUpdates>
+
+  <!-- optional additions to proguard -->
+  <proguardAdditions>
+    <insert>
+    </insert>
+  </proguardAdditions>
+
+  <!-- optional files or directories to copy or delete from Intermediate/Android/APK before ndk-build 
+	<prebuildCopies>
+	</prebuildCopies> -->
+
+  <!-- optional additions to the GameActivity imports in GameActivity.java -->
+  <gameActivityImportAdditions>
+    <insert>
+      import com.tencent.connect.common.Constants;
+      import com.tencent.connect.share.QQShare;
+      import com.tencent.connect.share.QzonePublish;
+      import com.tencent.connect.share.QzoneShare;
+      import com.tencent.tauth.IUiListener;
+      import com.tencent.tauth.Tencent;
+      import com.tencent.tauth.UiError;
+    </insert>
+  </gameActivityImportAdditions>
+
+  <!-- optional additions to the GameActivity class in GameActivity.java -->
+  <gameActivityClassAdditions>
+    <insert>
+      <![CDATA[
+  public static Tencent mTencent = null;
+  public static String  TENCENT_APPID = "111111111";
+  public static TencentBaseUiListener mTencentListener = null;
+  
+  /**
+  * 分享结果回调
+  * @param result  0分享失败 1分享成功 -1分享取消
+  * @param msg
+  */
+  public native void nativeOnTencentShareResult(int result, String msg);
+  
+  /**
+   * 分享新闻到QQ
+   * @param Title               分享的标题。注：PARAM_TITLE、PARAM_IMAGE_URL、PARAM_SUMMARY不能全为空，最少必须有一个是有值的。
+   * @param Summary             分享的消息摘要，最长50个字
+   * @param TargetURL           这条分享消息被好友点击后的跳转URL
+   * @param ImageURL            缩略图图地址
+   * @param APPName             手Q客户端顶部，替换“返回”按钮文字，如果为空，用返回代替
+   */
+  public void AndroidThunkJava_QQSDK_ShareToQQ_News(String Title, String Summary, String TargetURL, String ImageURL, String APPName)
+  {
+    final Bundle params = new Bundle();
+    params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+    params.putString(QQShare.SHARE_TO_QQ_TITLE, Title);
+    params.putString(QQShare.SHARE_TO_QQ_SUMMARY, Summary);
+    params.putString(QQShare.SHARE_TO_QQ_TARGET_URL,  TargetURL);
+    params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, ImageURL);
+    params.putString(QQShare.SHARE_TO_QQ_APP_NAME,  APPName);
+    mTencent.shareToQQ(GameActivity.this, params, mTencentListener);
+  }
+  
+  /**
+   * 分享新闻到QQ空间
+   * @param Title               分享的标题(必填)
+   * @param Summary             分享的消息摘要(必填)
+   * @param TargetURL           跳转URL(必填)
+   * @param ImageURL            缩略图图地址
+   */
+  public void AndroidThunkJava_QQSDK_ShareToQzone_News(String Title, String Summary, String TargetURL, String ImageURL) 
+  {
+    final Bundle params = new Bundle();
+    params.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE,QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
+    params.putString(QzoneShare.SHARE_TO_QQ_TITLE, Title);
+    params.putString(QzoneShare.SHARE_TO_QQ_SUMMARY, Summary);
+    params.putString(QzoneShare.SHARE_TO_QQ_TARGET_URL, TargetURL);
+
+    ArrayList<String> imageUrls = new ArrayList<String>();
+    if(ImageURL.length() > 0)
+    {
+      imageUrls.add(ImageURL);
+    }
+    params.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, imageUrls);
+      
+    mTencent.shareToQzone(GameActivity.this, params, mTencentListener);
+  }
+  
+  private class TencentBaseUiListener implements IUiListener {
+      @Override
+      public void onComplete(Object response) {
+          //分享成功后回调
+          nativeOnTencentShareResult(1, "");
+      }
+  
+      @Override
+      public void onError(UiError uiError) {
+          //分享失败后回调
+          //showResult("onError:", "code:" + uiError.errorCode + ", msg:" + uiError.errorMessage + ", detail:" + uiError.errorDetail);
+          String retMsg = "code:" + uiError.errorCode + ", msg:" + uiError.errorMessage + ", detail:" + uiError.errorDetail;
+          nativeOnTencentShareResult(0, retMsg);
+      }
+  
+      @Override
+      public void onCancel() {
+          //取消分享后回调
+          nativeOnTencentShareResult(-1, "");
+      }
+  }
+
+    ]]>
+    </insert>
+  </gameActivityClassAdditions>
+
+  <!-- optional additions to GameActivity onCreate metadata reading in GameActivity.java -->
+  <gameActivityReadMetadataAdditions>
+  </gameActivityReadMetadataAdditions>
+
+  <!-- optional additions to GameActivity onCreate in GameActivity.java -->
+  <gameActivityOnCreateAdditions>
+    <insert>
+      <![CDATA[
+      
+  //init Tencent
+  try {
+    mTencent = Tencent.createInstance(TENCENT_APPID, GameActivity.this);
+    mTencentListener = new TencentBaseUiListener();
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+    
+  ]]>
+    </insert>
+  </gameActivityOnCreateAdditions>
+
+  <!-- optional additions to GameActivity onDestroy in GameActivity.java-->
+  <gameActivityOnDestroyAdditions>
+  </gameActivityOnDestroyAdditions>
+
+  <!-- optional additions to GameActivity onStart in GameActivity.java -->
+  <gameActivityOnStartAdditions>
+  </gameActivityOnStartAdditions>
+
+  <!-- optional additions to GameActivity onStop in GameActivity.java -->
+  <gameActivityOnStopAdditions>
+  </gameActivityOnStopAdditions>
+
+  <!-- optional additions to GameActivity onPause in GameActivity.java -->
+  <gameActivityOnPauseAdditions>
+  </gameActivityOnPauseAdditions>
+
+  <!-- optional additions to GameActivity onResume in GameActivity.java -->
+  <gameActivityOnResumeAdditions>
+  </gameActivityOnResumeAdditions>
+
+  <!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
+  <gameActivityOnActivityResultAdditions>
+    <insert>
+      <![CDATA[
+    if (null != mTencent)
+    {
+      mTencent.onActivityResultData(requestCode,resultCode,data,mTencentListener);
+    }
+        ]]>
+    </insert>
+  </gameActivityOnActivityResultAdditions>
+
+  <!-- optional libraries to load in GameActivity.java before libUE4.so -->
+  <soLoadLibrary>
+  </soLoadLibrary>
+</root>
