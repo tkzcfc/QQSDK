@@ -111,7 +111,7 @@ static QQSDKDelegate* Static_QQSDKDelegate_Instance = NULL;
 
 -(void)applicationDidFinishLaunching:(NSNotification *)n
 {
-	[[TencentOAuth alloc] initWithAppId:@"111111111" andDelegate : nil];
+	[[TencentOAuth alloc] initWithAppId:@"101521650" andDelegate : nil];
 }
 
 // qq分享结果的回调
@@ -233,9 +233,9 @@ void UQQSDKFunctions::ShareToQQ_News(const FString& Title, const FString& Summar
 
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv(true))
 	{
-		if (AndroidThunkJava_QQSDK_ShareToQQ_Default == 0)
+		if (AndroidThunkJava_QQSDK_ShareToQQ_News == 0)
 		{
-			UE_LOG(LogAndroid, Warning, TEXT("I can't found the java method AndroidThunkJava_QQSDK_ShareToQQ_Default()\n"));
+			UE_LOG(LogAndroid, Warning, TEXT("I can't found the java method AndroidThunkJava_QQSDK_ShareToQQ_News()\n"));
 			return;
 		}
 
@@ -245,7 +245,7 @@ void UQQSDKFunctions::ShareToQQ_News(const FString& Title, const FString& Summar
 		jstring ImageURLArg = Env->NewStringUTF(TCHAR_TO_UTF8(*ImageURL));
 		jstring APPNameArg = Env->NewStringUTF(TCHAR_TO_UTF8(*APPName));
 
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, AndroidThunkJava_QQSDK_ShareToQQ_Default, TitleArg, SummaryArg, TargetURLArg, ImageURLArg, APPNameArg);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, AndroidThunkJava_QQSDK_ShareToQQ_News, TitleArg, SummaryArg, TargetURLArg, ImageURLArg, APPNameArg);
 
 		Env->DeleteLocalRef(TitleArg);
 		Env->DeleteLocalRef(SummaryArg);
@@ -253,7 +253,7 @@ void UQQSDKFunctions::ShareToQQ_News(const FString& Title, const FString& Summar
 		Env->DeleteLocalRef(ImageURLArg);
 		Env->DeleteLocalRef(APPNameArg);
 
-		UE_LOG(LogAndroid, Warning, TEXT("I found the java method AndroidThunkJava_QQSDK_ShareToQQ_Default()\n"));
+		UE_LOG(LogAndroid, Warning, TEXT("I found the java method AndroidThunkJava_QQSDK_ShareToQQ_News()\n"));
 	}
 	else
 	{
@@ -298,9 +298,9 @@ void UQQSDKFunctions::ShareToQzone_News(const FString& Title, const FString& Sum
 
 	if (JNIEnv* Env = FAndroidApplication::GetJavaEnv(true))
 	{
-		if (AndroidThunkJava_QQSDK_ShareToQzone_ImgText == 0)
+		if (AndroidThunkJava_QQSDK_ShareToQzone_News == 0)
 		{
-			UE_LOG(LogAndroid, Warning, TEXT("I can't found the java method AndroidThunkJava_QQSDK_ShareToQzone_ImgText()\n"));
+			UE_LOG(LogAndroid, Warning, TEXT("I can't found the java method AndroidThunkJava_QQSDK_ShareToQzone_News()\n"));
 			return;
 		}
 
@@ -309,7 +309,7 @@ void UQQSDKFunctions::ShareToQzone_News(const FString& Title, const FString& Sum
 		jstring TargetURLArg = Env->NewStringUTF(TCHAR_TO_UTF8(*TargetURL));
 		jstring ImageURLArg = Env->NewStringUTF(TCHAR_TO_UTF8(*ImageURL));
 
-		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, AndroidThunkJava_QQSDK_ShareToQzone_ImgText, TitleArg, SummaryArg, TargetURLArg, ImageURLArg);
+		FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, AndroidThunkJava_QQSDK_ShareToQzone_News, TitleArg, SummaryArg, TargetURLArg, ImageURLArg);
 
 		Env->DeleteLocalRef(TitleArg);
 		Env->DeleteLocalRef(SummaryArg);
